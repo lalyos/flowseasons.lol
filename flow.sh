@@ -26,7 +26,7 @@ update-html() {
   git add resources/ *.html 
   git commit -m "html updated"
   git push origin
-#   rm FlowSeasons-2025-Spring.zip
+  rm FlowSeasons-2025-Spring.zip
 }
 
 athlete-ids() {
