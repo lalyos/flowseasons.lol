@@ -3,9 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <title>FlowSeasons</title>
-    <meta http-equiv="refresh" content="0; url=routes.html">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .tabs {
+            display: flex;
+            background-color: #333;
+            overflow: hidden;
+        }
+        .tabs button {
+            flex: 1;
+            padding: 14px 16px;
+            cursor: pointer;
+            background-color: #333;
+            color: white;
+            border: none;
+            outline: none;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+        .tabs button:hover {
+            background-color: #575757;
+        }
+        .tabs button.active {
+            background-color: #575757;
+        }
+        .iframe-container {
+            width: 100%;
+            height: calc(100vh - 50px); /* Adjust height to fit the screen */
+            border: none;
+        }
+    </style>
+    <script>
+        function showPage(page) {
+            document.getElementById('iframe').src = page;
+            const buttons = document.querySelectorAll('.tabs button');
+            buttons.forEach(button => button.classList.remove('active'));
+            document.getElementById(page + '-tab').classList.add('active');
+        }
+    </script>
 </head>
 <body>
-    <p>If you are not redirected automatically, follow this <a href="routes.html">link</a>.</p>
+    <div class="tabs">
+        <button id="routes.html-tab" class="active" onclick="showPage('routes.html')">Routes</button>
+        <button id="rank.html-tab" onclick="showPage('rank.html')">Rank</button>
+        <button id="histogram.html-tab" onclick="showPage('histogram.html')">Histogram</button>
+    </div>
+    <iframe id="iframe" class="iframe-container" src="routes.html"></iframe>
 </body>
 </html>
