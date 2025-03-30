@@ -21,6 +21,16 @@ flow-result() {
   | tee results.json
 }
 
+update-html() {
+  unzip -o FlowSeasons-2025-Spring.zip
+   mv Routes.html Routes.html.1
+   mv Routes.html.1  routes.html
+   sed -i.bak 's@resources/sheet.css@sheet.css@' routes.html
+   rm -rf resources/ routes.html.bak
+   git add routes.html
+   git commit -m "html updated"
+   git push origin
+
 athlete-ids() {
   cat results.json \
   | jq -r '.startlist[].athlete_id' \
