@@ -20,6 +20,10 @@ flow-result() {
   flow-api category_rounds/2188/results \
   | tee results.json
 }
+ranks() {
+  cat results.json \
+   | jq -r '.ranking[]|"\(.rank)\t\(.score)\t\(.name)"'
+}
 
 update-html() {
   unzip -o FlowSeasons-2025-Spring.zip
@@ -49,7 +53,8 @@ all-athlete() {
 stat() {
   if ! [ -f stat.txt ] ; then
     for f in athlete-*.json; do
-        cat $f | jq -r '.ascents[]|select(.top)|.route_name' 2>/dev/null | tee -a stat.txt
+        cat $f | jq -r '.ascents[]|select(.top)|.route_name' 2>/dev/null \
+        | tee -a stat.txt
     done
   else
     echo # === stat.txt is done ...
@@ -59,9 +64,57 @@ stat() {
     | sort | uniq -c \
     | sed 's/ *\([0-9]\{1,3\}\) \([0-9]\{1,2\}\)/\2\t\1/' \
     | sort -n
-
 }
 
+jq-filter-sql() {
+  cat <<'EOF'
+    .athlete_id as $id 
+  | .name as $name 
+  | .ascents[]|select(.zone)
+  | "insert into ascents VALUES ( '\($id)', '\($name)' , '\(.route_name)' , \(.zone) , \(.top) );"
+EOF
+}
+
+jq-filter-txt() {
+  cat <<'EOF'
+    .athlete_id as $id 
+  | .name as $name 
+  | .ascents[]|select(.zone)
+  | "\($id)\t\($name)\t\(.route_name)\t\(.zone)\t\(.top)"
+EOF
+}
+
+create-raw-txt() {
+  for f in athlete-*.json; do
+    cat $f \
+    | jq -r -f <(jq-filter-txt)
+  done
+}
+
+create-raw-sql() {
+  for f in athlete-${1:-*}.json; do
+    cat $f \
+    | jq -r -f <(jq-filter-sql)
+  done
+}
+
+flow-sqlite() {
+  rm -f flow.db
+  sqlite3 flow.db < flow-schema.sql
+  create-raw-sql \
+  | tee flow-2025-sping.sql \
+  | sqlite3 flow.db
+}
+
+zones() {
+  sqlite3 flow.db -tabs <<EOF
+    SELECT route_name,count(*) 
+      FROM ascents 
+      WHERE is_zone 
+      GROUP BY  route_name 
+      ORDER BY cast(route_name as INTEGER);
+EOF
+}
 athlete() {
   declare id=$1
   : ${id:?reuired}
@@ -78,7 +131,9 @@ athlete() {
 }
 
 startlist() {
-  cat startlist-by-id.txt | fzf
+  cat results.json \
+   | jq -r '.startlist[]|"\(.athlete_id) \(.name)"'  \
+   | fzf
 }
 
 startlist-txt() {
