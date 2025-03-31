@@ -22,6 +22,20 @@ From idea to the first version of the working website took a couple of hours and
 
 Selfnotes, about how I produced this.
 
+```
+# get startlist from results page
+flow-result
+
+# collect ids to a textfile
+athlete-ids
+
+
+# get each athlete-s scorecad
+all-athlete
+```
+
+
+
 ### Google Sheets
 
 Importing the initial data for `routes.html`
